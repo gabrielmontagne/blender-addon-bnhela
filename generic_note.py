@@ -60,7 +60,7 @@ def get_lines(text_file):
 class NoteNode(bpy.types.Node):
     ''' Note '''
     bl_idname = 'GenericNoteNode'
-    bl_label = 'Note'
+    bl_label = 'Note
     bl_icon = 'OUTLINER_OB_EMPTY'
 
     @classmethod

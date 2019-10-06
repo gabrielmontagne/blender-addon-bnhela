@@ -4,8 +4,6 @@ from bpy.types import NodeTree, Node, NodeSocket, NodeSocketString
 import nodeitems_utils
 from nodeitems_utils import NodeCategory, NodeItem
 
-print(nodeitems_builtins, '<<<')
-
 class AnhelaNodeTree(NodeTree):
     bl_label = "Anhela Node Tree"
     bl_icon = "NODETREE"
@@ -30,7 +28,33 @@ class AnhelaSceneNode(Node, AnhelaNode):
     bl_label = "Scene Node"
     bl_icon = 'OUTLINER_DATA_ARMATURE'
 
+    time_specifier = [
+        ("DAY", "DAY", "", 0),
+        ("NIGHT", "NIGHT", "", 1)
+    ]
+
+    location_specifier = [
+        ("INT", "INT.", "", 0),
+        ("EXT", "EXT.", "", 1),
+        ("INTEXT", "INT./EXT.", "", 1)
+    ]
+
+    day_or_night: bpy.props.EnumProperty(
+        name="Time",
+        description="XX",
+        items=time_specifier,
+        default='DAY',
+    )
+
+    int_or_ext: bpy.props.EnumProperty(
+        name="Location",
+        description="YY",
+        items=location_specifier,
+        default='INT',
+    )
+
     def init(self, context):
+        print('Scene node init')
         self.inputs.new('NodeSocketString', 'Character')
         self.inputs.new('NodeSocketString', 'Character')
         self.inputs.new('NodeSocketString', 'Character')
@@ -40,6 +64,32 @@ class AnhelaSceneNode(Node, AnhelaNode):
         self.outputs.new('NodeSocketString', 'Character')
         self.outputs.new('NodeSocketString', 'Character')
         self.outputs.new('NodeSocketString', 'Character')
+
+    def update(self):
+        print('Scene node update', self)
+
+    def insert_link(self, link):
+        print('Scene link', self, link)
+
+    def copy(self, node):
+        print('Scene copy', self, node)
+
+    def free(self):
+        print('Scene free', self)
+
+    def draw_buttons(self, context, layout):
+        print('Scene draw buttons', self, context, layout)
+
+        layout.prop(self, 'int_or_ext')
+        layout.prop(self, 'day_or_night')
+
+    def draw_buttons_ext(self, context, layout):
+        print('Scene draw buttons ext', self, context, layout)
+
+    def draw_label(self):
+        print('Scene label')
+
+        return '{} - {}'.format(self.int_or_ext, self.day_or_night)
 
 class AnhelaNodeCategory(NodeCategory):
     @classmethod
