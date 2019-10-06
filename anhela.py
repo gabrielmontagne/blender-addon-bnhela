@@ -21,8 +21,13 @@ class AnhelaCharacterNode(Node, AnhelaNode):
     bl_label = "Character Node"
     bl_icon = 'OUTLINER_DATA_ARMATURE'
 
+    character_name: bpy.props.StringProperty(name='Name', default='MOTOKO')
+
     def init(self, context):
         self.outputs.new('NodeSocketString', 'Name')
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'character_name')
 
 class AnhelaSceneNode(Node, AnhelaNode):
     bl_label = "Scene Node"
@@ -79,7 +84,6 @@ class AnhelaSceneNode(Node, AnhelaNode):
 
     def draw_buttons(self, context, layout):
         print('Scene draw buttons', self, context, layout)
-
         layout.prop(self, 'int_or_ext')
         layout.prop(self, 'day_or_night')
 
