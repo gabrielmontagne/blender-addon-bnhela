@@ -44,7 +44,16 @@ class BnhelaCharacterSocket(NodeSocket):
     bl_label = 'Bnhela Character Socket'
 
     def on_name_update(self, context):
-        print('Name updated', self.character_name)
+
+        if not self.is_output:
+            print('Name updated', self.name, self.character_name)
+            return
+
+        other = get_other_socket(self)
+
+        print('Push update to other socket', other)
+        other.character_name = self.character_name
+        other.node.update()
 
     character_name: StringProperty('Name', update=on_name_update, default='')
 
@@ -86,9 +95,11 @@ class BnhelaCharacterNode(Node, BnhelaNode):
 
 
         name_socket = self.outputs['Name']
-        other_socket = get_other_socket(name_socket)
+        # other_socket = get_other_socket(name_socket)
 
         name_socket.character_name = self.character_name
+
+        return
 
         if not other_socket:
             print('No other socket, ciao!')
@@ -102,6 +113,9 @@ class BnhelaCharacterNode(Node, BnhelaNode):
         other_socket.character_name = self.character_name
 
         other_socket.node.update()
+
+    def draw_label(self):
+        return self.character_name
 
 
 class BnhelaSceneNode(Node, BnhelaNode):
