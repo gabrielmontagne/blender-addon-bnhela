@@ -46,12 +46,12 @@ class BnhelaCharacterSocket(NodeSocket):
     def on_name_update(self, context):
 
         if not self.is_output:
-            print('Name updated', self.name, self.character_name)
             return
 
         other = get_other_socket(self)
+        if not other:
+            return
 
-        print('Push update to other socket', other)
         other.character_name = self.character_name
         other.node.update()
 
@@ -61,7 +61,7 @@ class BnhelaCharacterSocket(NodeSocket):
         return (0.6, 0.0, 0.0, 1.0)
 
     def draw(self, context, layout, node, text):
-        layout.label(text='..' + self.character_name + '--')
+        layout.label(text=self.name.lower() + '_ ' + self.character_name)
 
 
 class BnhelaNode:
@@ -90,29 +90,8 @@ class BnhelaCharacterNode(Node, BnhelaNode):
         self.outputs.new('BnhelaCharacterSocket', 'Name')
 
     def update(self):
-        print('Char node update', self.name)
-        print('   ... out socket', self.outputs['Name'])
-
-
         name_socket = self.outputs['Name']
-        # other_socket = get_other_socket(name_socket)
-
         name_socket.character_name = self.character_name
-
-        return
-
-        if not other_socket:
-            print('No other socket, ciao!')
-            return
-
-
-        if name_socket.bl_idname != other_socket.bl_idname:
-            print('Socket mismatch, ouch X-(')
-            return
-
-        other_socket.character_name = self.character_name
-
-        other_socket.node.update()
 
     def draw_label(self):
         return self.character_name
@@ -130,6 +109,8 @@ class BnhelaSceneNode(Node, BnhelaNode):
     ]
 
     def init(self, context):
+
+        self.width = 400
 
         for char_title in self.char_titles:
             self.outputs.new('BnhelaCharacterSocket', char_title)
