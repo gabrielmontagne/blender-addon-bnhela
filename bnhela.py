@@ -88,15 +88,21 @@ class BnhelaCharacterNode(Node, BnhelaNode):
         name_socket = self.outputs['Name']
         other_socket = get_other_socket(name_socket)
 
+        name_socket.character_name = self.character_name
+
         if not other_socket:
             print('No other socket, ciao!')
             return
+
 
         if name_socket.bl_idname != other_socket.bl_idname:
             print('Socket mismatch, ouch X-(')
             return
 
         other_socket.character_name = self.character_name
+
+        print('node?', other_socket.node)
+        other_socket.node.update()
 
 
 class BnhelaSceneNode(Node, BnhelaNode):
@@ -113,6 +119,9 @@ class BnhelaSceneNode(Node, BnhelaNode):
         self.inputs.new('BnhelaCharacterSocket', 'Main Character')
         self.inputs.new('BnhelaCharacterSocket', '2nd Character')
         self.inputs.new('BnhelaCharacterSocket', '3rd Character')
+
+    def update(self):
+        print('Scene node update', self)
 
 
 
