@@ -52,7 +52,7 @@ class BnhelaCharacterSocket(NodeSocket):
         return (0.6, 0.0, 0.0, 1.0)
 
     def draw(self, context, layout, node, text):
-        layout.label(text=self.character_name)
+        layout.label(text='..' + self.character_name + '--')
 
 
 class BnhelaNode:
@@ -101,7 +101,6 @@ class BnhelaCharacterNode(Node, BnhelaNode):
 
         other_socket.character_name = self.character_name
 
-        print('node?', other_socket.node)
         other_socket.node.update()
 
 
@@ -110,18 +109,31 @@ class BnhelaSceneNode(Node, BnhelaNode):
     bl_label = "Scene Node"
     bl_icon = 'VIEW_CAMERA'
 
+    char_titles = [
+        'MC',
+        'OP',
+        'WC'
+    ]
+
     def init(self, context):
 
-        self.outputs.new('BnhelaCharacterSocket', 'Main Character')
-        self.outputs.new('BnhelaCharacterSocket', '2nd Character')
-        self.outputs.new('BnhelaCharacterSocket', '3rd Character')
-
-        self.inputs.new('BnhelaCharacterSocket', 'Main Character')
-        self.inputs.new('BnhelaCharacterSocket', '2nd Character')
-        self.inputs.new('BnhelaCharacterSocket', '3rd Character')
+        for char_title in self.char_titles:
+            self.outputs.new('BnhelaCharacterSocket', char_title)
+            self.inputs.new('BnhelaCharacterSocket', char_title)
 
     def update(self):
         print('Scene node update', self)
+
+        for char_title in self.char_titles:
+            input = self.inputs[char_title]
+            output = self.outputs[char_title]
+
+            if not input.is_linked:
+                input.character_name = ''
+
+            output.character_name = input.character_name
+
+
 
 
 
