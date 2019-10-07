@@ -64,6 +64,28 @@ class BnhelaCharacterSocket(NodeSocket):
         layout.label(text=self.name.lower() + '_ ' + self.character_name)
 
 
+class BnhelaSlugTimeSocket(NodeSocket):
+
+    bl_label = 'Bnhela Slut Time Socket'
+
+    time_specifier = [
+        ("DAY", "DAY", "", 0),
+        ("NIGHT", "NIGHT", "", 1)
+    ]
+
+    day_or_night: bpy.props.EnumProperty(
+        name="Time",
+        items=time_specifier,
+        default='DAY',
+    )
+
+    def draw(self, context, layout, node, text):
+        layout.prop(self, 'day_or_night')
+
+    def draw_color(self, context, node):
+        return(0.0, 0.6, 0.0, 1.0)
+
+
 class BnhelaNode:
 
     @classmethod
@@ -112,6 +134,8 @@ class BnhelaSceneNode(Node, BnhelaNode):
 
         self.width = 400
 
+        self.inputs.new('BnhelaSlugTimeSocket', 'Time')
+
         for char_title in self.char_titles:
             self.outputs.new('BnhelaCharacterSocket', char_title)
             self.inputs.new('BnhelaCharacterSocket', char_title)
@@ -150,6 +174,7 @@ classes = (
     BnhelaCharacterNode,
     BnhelaSceneNode,
     BnhelaCharacterSocket,
+    BnhelaSlugTimeSocket,
 )
 
 
