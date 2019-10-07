@@ -1,12 +1,9 @@
 # import IPython
+from bpy.types import NodeTree, Node, NodeSocket, NodeSocketString, NodeReroute
+from nodeitems_utils import NodeCategory, NodeItem
 import bpy
 import nodeitems_builtins
-from bpy.types import NodeTree, Node, NodeSocket, NodeSocketString, NodeReroute
 import nodeitems_utils
-from nodeitems_utils import NodeCategory, NodeItem
-
-def find_reroute_origin(link):
-    print('find node reroute', link)
 
 class AnhelaNodeTree(NodeTree):
     bl_label = "Anhela Node Tree"
@@ -107,7 +104,6 @@ class AnhelaCharacterNode(Node, AnhelaNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'character_name')
 
-
 class AnhelaSceneNode(Node, AnhelaNode):
     bl_label = "Scene Node"
     bl_icon = 'OUTLINER_DATA_ARMATURE'
@@ -137,9 +133,15 @@ class AnhelaSceneNode(Node, AnhelaNode):
         default='INT',
     )
 
+    text: bpy.types.Text
+
     def init(self, context):
         print('Scene node init')
+
+        location_input = self.inputs.new('StringSocket', 'Location')
+
         hero_input = self.inputs.new('AnhelaStringSocket', 'Hero')
+
         hero_output = self.outputs.new('AnhelaStringSocket', 'Hero')
 
     def update(self):
@@ -162,13 +164,14 @@ class AnhelaSceneNode(Node, AnhelaNode):
         print('Scene free', self)
 
     def draw_buttons(self, context, layout):
-        # print('Scene draw buttons', self, context, layout)
-        layout.prop(self, 'int_or_ext')
+        # layout.label('Heme npbpuvf')
+        # layout.prop(self, 'int_or_ext')
         layout.prop(self, 'day_or_night')
 
     def draw_buttons_ext(self, context, layout):
         # print('Scene draw buttons ext', self, context, layout)
-        pass
+        layout.prop(self, 'int_or_ext')
+        layout.prop(self, 'day_or_night')
 
     def draw_label(self):
         # print('Scene label')
