@@ -85,6 +85,29 @@ class BnhelaSlugTimeSocket(NodeSocket):
     def draw_color(self, context, node):
         return(0.0, 0.6, 0.0, 1.0)
 
+class BnhelaSlugIntExtSocket(NodeSocket):
+
+    bl_label = 'Bnhela Slut Int/Ext Socket'
+
+    location_specifier = [
+        ("INT", "INT.", "", 0),
+        ("EXT", "EXT.", "", 1),
+        ("INTEXT", "INT./EXT.", "", 1)
+    ]
+
+    int_or_ext: bpy.props.EnumProperty(
+        name="Location",
+        description="YY",
+        items=location_specifier,
+        default='INT',
+    )
+
+    def draw(self, context, layout, node, text):
+        layout.prop(self, 'int_or_ext')
+
+    def draw_color(self, context, node):
+        return(0.0, 0.6, 0.6, 1.0)
+
 
 class BnhelaNode:
 
@@ -132,9 +155,11 @@ class BnhelaSceneNode(Node, BnhelaNode):
 
     def init(self, context):
 
-        self.width = 400
+        self.width = 200
 
-        self.inputs.new('BnhelaSlugTimeSocket', 'Time')
+        self.inputs.new('NodeSocketInt', '#')
+        self.inputs.new('BnhelaSlugIntExtSocket', '')
+        self.inputs.new('BnhelaSlugTimeSocket', '')
 
         for char_title in self.char_titles:
             self.outputs.new('BnhelaCharacterSocket', char_title)
@@ -175,6 +200,7 @@ classes = (
     BnhelaSceneNode,
     BnhelaCharacterSocket,
     BnhelaSlugTimeSocket,
+    BnhelaSlugIntExtSocket,
 )
 
 
