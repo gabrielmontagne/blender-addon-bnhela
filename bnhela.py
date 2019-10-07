@@ -40,11 +40,15 @@ class BnhelaCharacterNode(Node, BnhelaNode):
 
 
 
+class BnhelaSceneNode(Node, BnhelaNode):
 
+    bl_label = "Scene Node"
+    bl_icon = 'VIEW_CAMERA'
 
-
-
-
+    def init(self, context):
+        self.inputs.new('BnhelaCharacterSocket', 'Main Character')
+        self.inputs.new('BnhelaCharacterSocket', '2nd Character')
+        self.inputs.new('BnhelaCharacterSocket', '3rd Character')
 
 
 
@@ -65,6 +69,7 @@ class BnhelaCharacterNode(Node, BnhelaNode):
 classes = (
     BnhelaNodeTree,
     BnhelaCharacterNode,
+    BnhelaSceneNode,
     BnhelaCharacterSocket,
 )
 
@@ -82,6 +87,7 @@ node_categories = [
         "Basic",
         items=[
             NodeItem("BnhelaCharacterNode"),
+            NodeItem("BnhelaSceneNode"),
         ]
     ),
 
