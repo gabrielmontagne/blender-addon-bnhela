@@ -1,5 +1,6 @@
 from bpy.props import StringProperty
 from bpy.types import NodeTree, Node, NodeSocket, NodeSocketString, NodeReroute
+from functools import reduce
 from nodeitems_utils import NodeCategory, NodeItem
 import bpy
 import nodeitems_builtins
@@ -31,6 +32,34 @@ def get_other_socket(socket):
     else:
         return other
 
+def find_outputs(acc, socket):
+
+
+    sockets = [l.to_socket for l in socket.links]
+
+    for socket in sockets:
+        if socket.node.bl_idname == 'NodeReroute':
+            print(' ∵ ∴ reroute', socket)
+            acc += find_outputs(acc, socket)
+        else:
+            print('last stop', socket)
+            acc.append(socket)
+
+    return acc
+
+def collate(acc, socket):
+
+    print('collate for', socket)
+
+    node = socket.node
+
+    if node.bl_idname == 'NodeReroute':
+        return reduce(collate, [l.to_socket for l in node.outputs[0].links], acc)
+
+    return acc + [socket]
+
+def get_all_outputs(socket):
+    return reduce(collate, [l.to_socket for l in socket.links], [])
 
 class BnhelaNodeTree(NodeTree):
     bl_label = BNT
@@ -39,34 +68,109 @@ class BnhelaNodeTree(NodeTree):
     def update(self):
         print('\n' * 2, '=========== Node tree update')
 
-class BnhelaCharacterSocket(NodeSocket):
-
-    bl_label = 'Bnhela Character Socket'
-
+class BnhelaEagerSocket():
     def on_name_update(self, context):
 
         if not self.is_output:
             return
 
-        other = get_other_socket(self)
-        if not other:
-            return
+        # other = get_other_socket(self)
 
-        other.character_name = self.character_name
-        other.node.update()
+        others = get_all_outputs(self)
 
-    character_name: StringProperty('Name', update=on_name_update, default='')
+        if others:
+            print('others, result\n .', '\n . '.join([o.name for o in others]))
+        else:
+            print('…')
+
+        for other in others:
+            if other.bl_idname != self.bl_idname:
+                return
+
+            other.payload = self.payload
+            other.node.update()
+
+    payload: StringProperty('Name', update=on_name_update, default='')
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=self.name.lower() + ' ' + self.payload)
+
+class BnhelaCharacterSocket(BnhelaEagerSocket, NodeSocket):
+
+    bl_label = 'Bnhela Character Socket'
 
     def draw_color(self, context, node):
         return (0.6, 0.0, 0.0, 1.0)
 
-    def draw(self, context, layout, node, text):
-        layout.label(text=self.name.lower() + '_ ' + self.character_name)
+class BnhelaLocationSocket(BnhelaEagerSocket, NodeSocket):
+
+    bl_label = 'Bnhela Character Socket'
+
+    def draw_color(self, context, node):
+        return (0.6, 0.0, 0.6, 1.0)
 
 
-class BnhelaSlugTimeSocket(NodeSocket):
+class BnhelaNode:
 
-    bl_label = 'Bnhela Slut Time Socket'
+    @classmethod
+    def poll(cls, ntree):
+        return ntree.bl_idname == BNT
+
+
+class BnhelaLocationNode(Node, BnhelaNode):
+
+    bl_label = "Location Node"
+    bl_icon = 'VIEW_PERSPECTIVE'
+
+    def on_payload_update(self, context):
+        self.update()
+
+    payload: StringProperty(update=on_payload_update)
+
+    def draw_buttons(self, context, layout):
+        layout = layout
+        layout.prop(self, 'payload', text='Namε')
+
+    def init(self, context):
+        self.outputs.new('BnhelaLocationSocket', 'Name')
+
+    def update(self):
+        name_socket = self.outputs['Name']
+        name_socket.payload = self.payload
+
+    def draw_label(self):
+        return '{} - λ'.format(self.payload)
+
+
+class BnhelaCharacterNode(Node, BnhelaNode):
+
+    bl_label = "Character Node"
+    bl_icon = 'OUTLINER_DATA_ARMATURE'
+
+    def on_payload_update(self, context):
+        self.update()
+
+    payload: StringProperty(update=on_payload_update)
+
+    def draw_buttons(self, context, layout):
+        layout = layout
+        layout.prop(self, 'payload', text='Namε')
+
+    def init(self, context):
+        self.outputs.new('BnhelaCharacterSocket', 'Name')
+
+    def update(self):
+        name_socket = self.outputs['Name']
+        name_socket.payload = self.payload
+
+    def draw_label(self):
+        return '{} - χ'.format(self.payload)
+
+
+class BnhelaSceneNode(Node, BnhelaNode):
+
+    bl_label = "Scene Node"
+    bl_icon = 'VIEW_CAMERA'
 
     time_specifier = [
         ("DAY", "DAY", "", 0),
@@ -79,73 +183,18 @@ class BnhelaSlugTimeSocket(NodeSocket):
         default='DAY',
     )
 
-    def draw(self, context, layout, node, text):
-        layout.prop(self, 'day_or_night')
-
-    def draw_color(self, context, node):
-        return(0.0, 0.6, 0.0, 1.0)
-
-class BnhelaSlugIntExtSocket(NodeSocket):
-
-    bl_label = 'Bnhela Slut Int/Ext Socket'
-
     location_specifier = [
-        ("INT", "INT.", "", 0),
-        ("EXT", "EXT.", "", 1),
-        ("INTEXT", "INT./EXT.", "", 1)
+        ("INT.", "INT.", "", 0),
+        ("EXT.", "EXT.", "", 1),
+        ("INT./EXT.", "INT./EXT.", "", 2)
     ]
 
     int_or_ext: bpy.props.EnumProperty(
         name="Location",
         description="YY",
         items=location_specifier,
-        default='INT',
+        default='INT.',
     )
-
-    def draw(self, context, layout, node, text):
-        layout.prop(self, 'int_or_ext')
-
-    def draw_color(self, context, node):
-        return(0.0, 0.6, 0.6, 1.0)
-
-
-class BnhelaNode:
-
-    @classmethod
-    def poll(cls, ntree):
-        return ntree.bl_idname == BNT
-
-
-class BnhelaCharacterNode(Node, BnhelaNode):
-
-    bl_label = "Character Node"
-    bl_icon = 'OUTLINER_DATA_ARMATURE'
-
-    def on_character_name_update(self, context):
-        print('on character_name update (on node)', self, self.character_name)
-        self.update()
-
-    character_name: StringProperty(update=on_character_name_update)
-
-    def draw_buttons(self, context, layout):
-        layout = layout
-        layout.prop(self, 'character_name', text='Namε')
-
-    def init(self, context):
-        self.outputs.new('BnhelaCharacterSocket', 'Name')
-
-    def update(self):
-        name_socket = self.outputs['Name']
-        name_socket.character_name = self.character_name
-
-    def draw_label(self):
-        return self.character_name
-
-
-class BnhelaSceneNode(Node, BnhelaNode):
-
-    bl_label = "Scene Node"
-    bl_icon = 'VIEW_CAMERA'
 
     char_titles = [
         'MC',
@@ -153,17 +202,24 @@ class BnhelaSceneNode(Node, BnhelaNode):
         'WC'
     ]
 
-    def init(self, context):
+    scene_index: bpy.props.IntProperty(name='Scene index', min=0)
 
+    def init(self, context):
         self.width = 200
 
-        self.inputs.new('NodeSocketInt', '#')
-        self.inputs.new('BnhelaSlugIntExtSocket', '')
-        self.inputs.new('BnhelaSlugTimeSocket', '')
+        self.inputs.new('BnhelaLocationSocket', 'Location')
 
         for char_title in self.char_titles:
-            self.outputs.new('BnhelaCharacterSocket', char_title)
             self.inputs.new('BnhelaCharacterSocket', char_title)
+            self.outputs.new('BnhelaCharacterSocket', char_title)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'int_or_ext')
+        layout.prop(self, 'day_or_night')
+        layout.prop(self, 'scene_index')
+
+    def draw_label(self):
+        return '{:03d}. {} - {}'.format(self.scene_index, self.int_or_ext, self.day_or_night)
 
     def update(self):
         print('Scene node update', self)
@@ -173,17 +229,9 @@ class BnhelaSceneNode(Node, BnhelaNode):
             output = self.outputs[char_title]
 
             if not input.is_linked:
-                input.character_name = ''
+                input.payload = ''
 
-            output.character_name = input.character_name
-
-
-
-
-
-
-
-
+            output.payload = input.payload
 
 
 
@@ -197,10 +245,10 @@ class BnhelaSceneNode(Node, BnhelaNode):
 classes = (
     BnhelaNodeTree,
     BnhelaCharacterNode,
+    BnhelaLocationNode,
     BnhelaSceneNode,
     BnhelaCharacterSocket,
-    BnhelaSlugTimeSocket,
-    BnhelaSlugIntExtSocket,
+    BnhelaLocationSocket,
 )
 
 
@@ -217,6 +265,7 @@ node_categories = [
         "Basic",
         items=[
             NodeItem("BnhelaCharacterNode"),
+            NodeItem("BnhelaLocationNode"),
             NodeItem("BnhelaSceneNode"),
         ]
     ),
