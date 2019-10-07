@@ -4,10 +4,39 @@ import bpy
 import nodeitems_builtins
 import nodeitems_utils
 
+BNT = "Bnhela Node Tree"
+
 class BnhelaNodeTree(NodeTree):
-    bl_label = "Bnhela Node Tree"
+    bl_label = BNT
     bl_icon = "EVENT_B"
 
+class BnhelaCharacterSocket(NodeSocket):
+
+    bl_label = 'Bnhela Character Socket'
+
+    def draw_color(self, context, node):
+        return (0.6, 0.0, 0.0, 1.0)
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+
+
+
+class BnhelaNode:
+
+    @classmethod
+    def poll(cls, ntree):
+        return ntree.bl_idname == BNT
+
+
+class BnhelaCharacterNode(Node, BnhelaNode):
+
+    bl_label = "Character Node"
+    bl_icon = 'OUTLINER_DATA_ARMATURE'
+
+    def init(self, context):
+        self.outputs.new('BnhelaCharacterSocket', 'Name')
 
 
 
@@ -19,6 +48,25 @@ class BnhelaNodeTree(NodeTree):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+#####################################################################
+
+classes = (
+    BnhelaNodeTree,
+    BnhelaCharacterNode,
+    BnhelaCharacterSocket,
+)
 
 
 class BnhelaNodeCategory(NodeCategory):
@@ -33,6 +81,7 @@ node_categories = [
         'GENERIC',
         "Basic",
         items=[
+            NodeItem("BnhelaCharacterNode"),
         ]
     ),
 
@@ -46,9 +95,6 @@ node_categories = [
     )
 ]
 
-classes = (
-    BnhelaNodeTree,
-)
 
 def register():
     from bpy.utils import register_class
