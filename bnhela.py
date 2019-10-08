@@ -8,49 +8,21 @@ import nodeitems_utils
 
 BNT = "Bnhela Node Tree"
 
-def get_other_socket(socket):
-    """
-    Get next real upstream socket.
-    Will return None if there isn't a another socket connect
-    so no need to check socket.links
-
-    From, https://blender.stackexchange.com/a/153909/19669
-    """
-
-    if not socket.is_linked:
-        return None
-    if not socket.is_output:
-        other = socket.links[0].from_socket
-    else:
-        other = socket.links[0].to_socket
-
-    if other.node.bl_idname == 'NodeReroute':
-        if not socket.is_output:
-            return get_other_socket(other.node.inputs[0])
-        else:
-            return get_other_socket(other.node.outputs[0])
-    else:
-        return other
+bl_info = {
+    'name': 'Bnhela Node Tree'
+}
 
 def find_outputs(acc, socket):
-
-
     sockets = [l.to_socket for l in socket.links]
-
     for socket in sockets:
         if socket.node.bl_idname == 'NodeReroute':
-            print(' ∵ ∴ reroute', socket)
             acc += find_outputs(acc, socket)
         else:
-            print('last stop', socket)
             acc.append(socket)
 
     return acc
 
 def collate(acc, socket):
-
-    print('collate for', socket)
-
     node = socket.node
 
     if node.bl_idname == 'NodeReroute':
@@ -65,23 +37,13 @@ class BnhelaNodeTree(NodeTree):
     bl_label = BNT
     bl_icon = "EVENT_B"
 
-    def update(self):
-        print('\n' * 2, '=========== Node tree update')
-
 class BnhelaEagerSocket():
     def on_name_update(self, context):
 
         if not self.is_output:
             return
 
-        # other = get_other_socket(self)
-
         others = get_all_outputs(self)
-
-        if others:
-            print('others, result\n .', '\n . '.join([o.name for o in others]))
-        else:
-            print('…')
 
         for other in others:
             if other.bl_idname != self.bl_idname:
@@ -109,13 +71,11 @@ class BnhelaLocationSocket(BnhelaEagerSocket, NodeSocket):
     def draw_color(self, context, node):
         return (0.6, 0.0, 0.6, 1.0)
 
-
 class BnhelaNode:
 
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname == BNT
-
 
 class BnhelaLocationNode(Node, BnhelaNode):
 
@@ -141,7 +101,6 @@ class BnhelaLocationNode(Node, BnhelaNode):
     def draw_label(self):
         return '{} - λ'.format(self.payload)
 
-
 class BnhelaCharacterNode(Node, BnhelaNode):
 
     bl_label = "Character Node"
@@ -165,7 +124,6 @@ class BnhelaCharacterNode(Node, BnhelaNode):
 
     def draw_label(self):
         return '{} - χ'.format(self.payload)
-
 
 class BnhelaSceneNode(Node, BnhelaNode):
 
@@ -222,8 +180,6 @@ class BnhelaSceneNode(Node, BnhelaNode):
         return '{:03d}. {} - {}'.format(self.scene_index, self.int_or_ext, self.day_or_night)
 
     def update(self):
-        print('Scene node update', self)
-
         for char_title in self.char_titles:
             input = self.inputs[char_title]
             output = self.outputs[char_title]
@@ -232,13 +188,6 @@ class BnhelaSceneNode(Node, BnhelaNode):
                 input.payload = ''
 
             output.payload = input.payload
-
-
-
-
-
-
-
 
 #####################################################################
 
@@ -251,13 +200,10 @@ classes = (
     BnhelaLocationSocket,
 )
 
-
 class BnhelaNodeCategory(NodeCategory):
     @classmethod
     def poll(cls, context):
         return context.space_data.tree_type == 'BnhelaNodeTree'
-
-
 
 node_categories = [
     BnhelaNodeCategory(
@@ -279,7 +225,6 @@ node_categories = [
         ]
     )
 ]
-
 
 def register():
     from bpy.utils import register_class
