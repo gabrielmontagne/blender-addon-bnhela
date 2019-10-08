@@ -9,7 +9,11 @@ import nodeitems_utils
 BNT = "Bnhela Node Tree"
 
 bl_info = {
-    'name': 'Bnhela Node Tree'
+    'name': 'Bnhela Node Tree',
+    'author': 'gabriel montagné, gabriel@tibas.london',
+    'version': (0, 0, 1),
+    'blender': (2, 80, 0),
+    'description': 'Node tree for sketching scene relationships',
 }
 
 def find_outputs(acc, socket):
@@ -188,8 +192,6 @@ class BnhelaSceneNode(Node, BnhelaNode):
                 input.payload = ''
 
             output.payload = input.payload
-
-#####################################################################
 
 classes = (
     BnhelaNodeTree,
