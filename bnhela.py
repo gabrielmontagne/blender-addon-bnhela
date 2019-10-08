@@ -172,7 +172,7 @@ class BnhelaSceneNode(Node, BnhelaNode):
         layout.prop(self, 'scene_index')
 
     def draw_label(self):
-        return '{:03d}. {} - {}'.format(self.scene_index, self.int_or_ext, self.day_or_night)
+        return '{:03d}. {} {} - {}'.format(self.scene_index, self.int_or_ext, self.inputs['Location'].payload, self.day_or_night)
 
     def update(self):
         for char_title in self.char_titles:
