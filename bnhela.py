@@ -14,17 +14,8 @@ bl_info = {
     'version': (0, 0, 1),
     'blender': (2, 80, 0),
     'description': 'Node tree for sketching scene relationships',
+    'tracker_url': 'https://github.com/gabrielmontagne/blender-addon-bnhela/issues'
 }
-
-def find_outputs(acc, socket):
-    sockets = [l.to_socket for l in socket.links]
-    for socket in sockets:
-        if socket.node.bl_idname == 'NodeReroute':
-            acc += find_outputs(acc, socket)
-        else:
-            acc.append(socket)
-
-    return acc
 
 def collate(acc, socket):
     node = socket.node
