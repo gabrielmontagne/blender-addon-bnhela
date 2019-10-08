@@ -1,3 +1,6 @@
 = Bnhela
 
-Text node tree for blender
+Text node tree for blender.
+Short étude on blender node API.
+
+image::shot.png[noodles]
