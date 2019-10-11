@@ -125,6 +125,7 @@ class BnhelaSceneNode(Node, BnhelaNode):
     bl_label = "Scene Node"
     bl_icon = 'VIEW_CAMERA'
 
+
     time_specifier = [
         ("DAY", "DAY", "", 0),
         ("NIGHT", "NIGHT", "", 1)
@@ -159,9 +160,10 @@ class BnhelaSceneNode(Node, BnhelaNode):
     ]
 
     scene_index: bpy.props.IntProperty(name='Scene index', min=0)
+    scene_summary: StringProperty(name='Summary', default='')
 
     def init(self, context):
-        self.width = 200
+        self.width = 400
 
         self.inputs.new('BnhelaLocationSocket', 'Location')
         self.outputs.new('BnhelaLocationSocket', 'Location')
@@ -170,14 +172,14 @@ class BnhelaSceneNode(Node, BnhelaNode):
             self.inputs.new('BnhelaCharacterSocket', char_title)
             self.outputs.new('BnhelaCharacterSocket', char_title)
 
-
     def draw_buttons(self, context, layout):
+        layout.prop(self, 'scene_index')
+        layout.prop(self, 'scene_summary')
         layout.prop(self, 'int_or_ext')
         layout.prop(self, 'day_or_night')
-        layout.prop(self, 'scene_index')
 
     def draw_label(self):
-        return '{:03d}. {} {} - {}'.format(self.scene_index, self.int_or_ext, self.inputs['Location'].payload, self.day_or_night)
+        return '<{:03d} {}> {} {} - {}'.format(self.scene_index, self.scene_summary, self.int_or_ext, self.inputs['Location'].payload, self.day_or_night)
 
     def update(self):
         for char_title in self.char_titles:
