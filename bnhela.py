@@ -152,7 +152,10 @@ class BnhelaSceneNode(Node, BnhelaNode):
     char_titles = [
         'MC',
         'OP',
-        'WC'
+        'WC',
+        'α',
+        'β',
+        'γ'
     ]
 
     scene_index: bpy.props.IntProperty(name='Scene index', min=0)
@@ -161,10 +164,12 @@ class BnhelaSceneNode(Node, BnhelaNode):
         self.width = 200
 
         self.inputs.new('BnhelaLocationSocket', 'Location')
+        self.outputs.new('BnhelaLocationSocket', 'Location')
 
         for char_title in self.char_titles:
             self.inputs.new('BnhelaCharacterSocket', char_title)
             self.outputs.new('BnhelaCharacterSocket', char_title)
+
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'int_or_ext')
@@ -183,6 +188,8 @@ class BnhelaSceneNode(Node, BnhelaNode):
                 input.payload = ''
 
             output.payload = input.payload
+
+        self.outputs['Location'].payload = self.inputs['Location'].payload
 
 classes = (
     BnhelaNodeTree,
